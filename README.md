@@ -1,7 +1,14 @@
 # YTAdSlayer
 YTAdSlayer is an Android app (minimum SDK 33) that aims to monitor YouTube playback on your device and help "slay" in-stream ads by reacting when YouTube is playing a video.
 
-The project is currently in an early experimental phase. The core idea is to use an accessibility-based background service to detect when the YouTube app is active and playing media, then expose callbacks to the app so you can build custom logic around ad detection and handling.
+The project is currently in an **early experimental phase**. The core idea is to use an accessibility-based background service to detect when the YouTube app is active and playing media, then expose callbacks to the app so you can build custom logic around ad detection and handling.
+
+The first concrete implementation of this idea is an accessibility service that:
+
+- Watches for when the foreground app is **YouTube** (`com.google.android.youtube`).
+- Recursively inspects the current window hierarchy while YouTube is active.
+- Looks for an **enabled** UI element whose text contains `skip` (e.g., "Skip ads").
+- Logs when such a potential *Skip* button is found, and includes experimental logic for trying to click it.
 
 ---
 
@@ -10,16 +17,13 @@ The project is currently in an early experimental phase. The core idea is to use
 Current state:
 
 - **UI**: Simple Jetpack Compose screen showing the app title and a message that the accessibility watcher is ready to configure.
-- **Service skeleton**: An accessibility service `com.jfc.YouTubeWatcher` is declared in the manifest with configuration provided via `@xml/accessibility_service_config`.
-- **Architecture**: High-level design work is in progress for how the background monitoring should be structured.
+- **Accessibility service**: `com.jfc.YouTubeWatcher` is declared in the manifest with configuration provided via `@xml/accessibility_service_config` and is wired up as an `AccessibilityService` implementation.
+- **Current behavior**:
+  - Detects when the active package is **YouTube** and toggles an internal `in-YouTube` flag.
+  - While YouTube is active, periodically scans the active window for an **enabled** view whose text contains `skip`.
+  - Logs when such a view is found and, in experimental code paths, attempts to perform a click action on the node hierarchy.
+- **Architecture**: A first-pass accessibility-based watcher is implemented; broader monitoring architecture and additional detection strategies are still in progress.
 
-Planned work (from `Todo.md`):
-
-- Design architecture for a background service to monitor foreground apps and detect YouTube playback.
-- Decide between (or combine) AccessibilityService, UsageStatsManager, media session callbacks, and notification listener approaches.
-- Create a robust Android service / accessibility or foreground-service skeleton within this app.
-- Determine and document all required permissions and user settings (usage access, accessibility, notification access, etc.).
-- Implement logic to identify when YouTube is playing a video and expose callbacks for ad-related handling.
 
 ---
 
@@ -62,14 +66,14 @@ You should see a simple screen titled **"YT Ad Slayer"** with a message that the
 
 ## Permissions and User Setup (Planned)
 
-The accessibility-based watcher and any additional monitoring approaches will likely require some or all of the following (still being designed):
+The accessibility-based watcher and any additional monitoring approaches will require some or all of the following. The **accessibility service** is already in use; the others are still being evaluated.
 
-- **Accessibility service**: Enabling the `YouTubeWatcher` accessibility service in system settings.
+- **Accessibility service** (current): Enabling the `YouTubeWatcher` accessibility service in system settings so it can observe YouTube UI and look for potential Skip buttons.
 - **Usage access**: Allowing the app to see which app is in the foreground (if UsageStatsManager is used).
 - **Notification listener**: Granting notification access (if notification-based detection is used).
 - **Media session callbacks**: Integrations for observing media playback state.
 
-Once the architecture is finalized and implemented, this section will be expanded with exact steps and screenshots for enabling the required permissions.
+Once the architecture is more complete, this section will be expanded with exact steps and screenshots for enabling the required permissions and verifying that the watcher is active.
 
 ---
 
@@ -82,16 +86,23 @@ High-level design goals:
 - **Callback surface**: Provide a clean interface inside the app for responding to events such as *YouTube started playback*, *ad likely detected*, *playback resumed*, etc.
 - **Privacy-focused**: Only inspect the minimal information required to detect playback state and ads, avoiding unnecessary data collection.
 
-As these components are implemented, the README will be updated with concrete class and package references.
+Current implementation notes:
+
+- The `YouTubeWatcher` service listens to accessibility events and checks the **package name** to detect when YouTube becomes active or inactive.
+- A simple handler periodically re-scans the active window while YouTube is active to look for an enabled "Skip"-like button.
+- Detection is currently **heuristic and experimental**, primarily intended for local experimentation and logging.
+
+As additional components are implemented (e.g., richer heuristics, configuration UI, diagnostics), the README will be updated with more concrete class and package references.
 
 ---
 
 ## Roadmap
 
 - **Short term**
-  - Finalize the monitoring approach (AccessibilityService vs. UsageStatsManager vs. media session vs. notifications).
-  - Flesh out the `YouTubeWatcher` service implementation.
-  - Expose basic callbacks/events to the UI.
+  - Iterate on the accessibility-based monitoring approach (tuning event handling and skip-button detection).
+  - Decide if/when to introduce complementary mechanisms (UsageStatsManager, media session, notifications).
+  - Flesh out the `YouTubeWatcher` service implementation and behavior around skip detection.
+  - Expose basic callbacks/events and state to the UI (e.g., is watcher enabled, last detection events).
 
 - **Medium term**
   - Improve configuration UI so users can enable/disable detection features and see status.
