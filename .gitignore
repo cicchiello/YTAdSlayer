@@ -1,0 +1,37 @@
+# Gradle
+.gradle/
+**/build/
+**/out/
+
+# Local configuration
+local.properties
+.gradle/gradle.properties
+
+# IntelliJ / Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Android specific
+.cxx/
+captures/
+.externalNativeBuild/
+
+# Signing keys (if any are added later)
+*.jks
+*.keystore
+
+# Log files
+*.log
+
+# OS / editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/
+
+# Misc
+*.tmp
+*.orig
