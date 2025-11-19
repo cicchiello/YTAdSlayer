@@ -96,27 +96,8 @@ As additional components are implemented (e.g., richer heuristics, configuration
 
 ---
 
-## Roadmap
-
-- **Short term**
-  - Iterate on the accessibility-based monitoring approach (tuning event handling and skip-button detection).
-  - Decide if/when to introduce complementary mechanisms (UsageStatsManager, media session, notifications).
-  - Flesh out the `YouTubeWatcher` service implementation and behavior around skip detection.
-  - Expose basic callbacks/events and state to the UI (e.g., is watcher enabled, last detection events).
-
-- **Medium term**
-  - Improve configuration UI so users can enable/disable detection features and see status.
-  - Add diagnostics/logging screens to help debug detection accuracy.
-
-- **Long term**
-  - Experiment with more advanced ad detection heuristics.
-  - Harden the service for stability and battery impact.
-
----
-
 ## Contributing / Working on the Project
 
 This project is currently experimental and evolving. If you are iterating locally:
 
-- Use `Todo.md` to track design decisions and next steps.
 - Keep accessibility and privacy implications in mind when adding new detection logic.
